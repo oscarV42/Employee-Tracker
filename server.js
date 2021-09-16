@@ -72,7 +72,25 @@ app.get('/api/roles', (req, res) => {
   });
 });
 
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// Create a role
+app.post('/api/new-role', ({ body }, res) => {
+  const sql = `INSERT INTO roles (role_name) (role_salary) (department_id)
+    VALUES (?)`;
+  const params = [body.role_name, body.role_salary, body.department_id];
+
+  db.query(sql, params, (err, result) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({
+      message: 'success',
+      data: body,
+    });
   });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
