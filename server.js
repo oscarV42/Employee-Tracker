@@ -56,6 +56,21 @@ app.post('/api/new-department', ({ body }, res) => {
   });
 });
 
+  // Read all roles
+app.get('/api/roles', (req, res) => {
+  const sql = `SELECT id, role_name AS title FROM roles`;
+    
+  db.query(sql, (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json({
+      message: 'success',
+      data: rows,
+    });
+  });
+});
 
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
