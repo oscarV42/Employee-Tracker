@@ -1,4 +1,5 @@
 const inquirer = require('inquirer');
+const server = require('./server/server.js')
 
 
 const department = [
