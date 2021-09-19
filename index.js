@@ -124,10 +124,7 @@ function choice_handler(answer){
             createNewRole();
             break;
         case 'Add an employee':
-            inquirer.prompt(employee)
-            .then((answer) => {
-                console.log(answer)
-            })
+             createNewEmployee();
             break;
         case 'Update an employee role':
             break; 
@@ -228,12 +225,41 @@ function viewEmployees() {
         
       db.query(sql, (err, result) => {
         if (err) {
-          res.status(500).json({ error: err.message });
+          console.log(err)
           return;
         }
         console.table(result);
         init();
       });
 }
+
+function createNewEmployee() {
+    const sql = "SELECT department_Id, role_title FROM roles";
+    const sql2 = "SELECT id, first_name, last_name FROM employees"
+
+    db.query(sql, (err, result) => {
+        if(err){
+            console.log(err)
+            return;
+        }
+        const roles = [];
+        for(var i = 0; i <= result.length; i++){
+            roles.push(result[i].role_title);
+        }
+        
+        const Mngers = [];
+        db.query(sql2, (err, result) => {
+            if(err){
+                console.log(err);
+                return;
+            }
+            for(var i = 0; i <= result.length; 1++){
+                Mngers.push(`${result[i].first_name} ${result[i].last_name}`)
+            }
+            employeePrompt(roles, Mngers);
+        })
+    })
+}
+
 // Function call to initialize app
 init();
