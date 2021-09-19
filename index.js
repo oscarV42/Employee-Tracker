@@ -31,7 +31,8 @@ const department = [
         name: 'department_name'  
     }
 ]
-const role = [
+const rolePrompt = (Departments) => {
+    inquirer.prompt([
     {
         type: 'input',
         message: 'Please enter role name:',
@@ -43,11 +44,25 @@ const role = [
         name: 'role_salary'
     },
     {
-        type: 'input',
-        message: 'Please enter department id:',
-        name: 'department_id'
+        type: 'list',
+        message: 'Please select department this role belongs to',
+        name: 'department_id',
+        choices: Departments,
         },
-]
+    ]).then((roleData) => {
+        let role_title = answer.role_name;
+        let salary = answer.role_salary;
+        let department = answer.department_id;
+
+        db.query(`SELECT id FROM department 
+        WHERE name = ('${department}')`), (err, result) => {
+            if(err){
+                console.error(err);
+            }
+            const department_id = result.id;
+        }
+    })
+}
 const employee = [
     {
         type: 'input',
@@ -75,22 +90,24 @@ const employee = [
 function choice_handler(answer){
     switch(answer) {
         case 'View all departments':
-            getDepartments();
+            viewDepts();
             break;
         case 'View all roles':
+            viewRoles();
             break;
         case 'View all employees':
+            viewEmployees();
             break;
         case 'Add a department':
             inquirer.prompt(department)
             .then((answer) => {
-                console.log(answer.department_name)
+                addNewDept(answer.department_name)
             })
             break;
         case 'Add a role':
             inquirer.prompt(role)
             .then((answer) => {
-                console.log(answer)
+                createNewRole(answer)
             })
             break;
         case 'Add an employee':
@@ -102,6 +119,7 @@ function choice_handler(answer){
         case 'Update an employee role':
             break; 
             default:
+                db.end();
                 break;
     }   
 }
@@ -131,88 +149,91 @@ function init() {
 }
 
   // Read all departments
-  app.get('/api/departments', (req, res) => {
-    const sql = `SELECT * FROM departments`;
-    
+  function viewDepts() {
+    const sql = `SELECT * FROM departments`; 
     db.query(sql, (err, rows) => {
       if (err) {
         res.status(500).json({ error: err.message });
         return;
       }
-      res.json({
-        message: 'success',
-        data: rows,
-      });
+      console.table(rows);
+      init();
     });
-  });
-    
+
+}
+function addNewDept(newDept) {
   // Create a department
-  app.post('/api/new-department', ({ body }, res) => {
     const sql = `INSERT INTO departments (department_name)
-      VALUES (?)`;
-    const params = [body.department_name];
+      VALUE (?)`;
+    const params = [newDept];
   
     db.query(sql, params, (err, result) => {
       if (err) {
-        res.status(400).json({ error: err.message });
+        console.error(err)
         return;
       }
-      res.json({
-        message: 'success',
-        data: body,
-      });
+      console.log('Successfully added department to database!')
+      init();
     });
-  });
+}
   
     // Read all roles
-  app.get('/api/roles', (req, res) => {
+function viewRoles(){
     const sql = `SELECT * FROM roles`;
       
-    db.query(sql, (err, rows) => {
+    db.query(sql, (err, result) => {
       if (err) {
         res.status(500).json({ error: err.message });
         return;
       }
-      res.json({
-        message: 'success',
-        data: rows,
-      });
+      console.table(result)
+      init();
     });
-  });
-  
+}
+
+function createNewRole(newRole) {
   // Create a role
-  app.post('/api/new-role', ({ body }, res) => {
-    const sql = `INSERT INTO roles (role_name) (role_salary) (department_id)
-      VALUES (?)`;
-    const params = [body.role_name, body.role_salary, body.department_id];
-  
-    db.query(sql, params, (err, result) => {
+  const getDepts = () => {
+    var query =
+      `SELECT id , name FROM department`
+    db.query(query, function (err, result) {
       if (err) {
-        res.status(400).json({ error: err.message });
+        console.log('Error while fetching department data');
         return;
       }
-      res.json({
-        message: 'success',
-        data: body,
-      });
-    });
-  });
+      const depts = [];
+      for (let index = 0; index < res.length; index++) {
+        depts.push(result[index].name);
+      }
+      rolePrompt(depts)
+    })
+    }
+    // const sql = `INSERT INTO roles (role_title) (role_salary) (department_Id)
+    //   VALUES (?)`;
+    // const params = [newRole.role_name, newRole.role_salary, newRole.department_id];
+  
+    // db.query(sql, params, (err, result) => {
+    //   if (err) {
+    //     console.error(err)
+    //     return;
+    //   }
+    //   console.log('Successfully added role to database!')
+    // });
+
+}
   
     // Read all employees
-    app.get('/api/employees', (req, res) => {
-      const sql = `SELECT * FROM departments`;
+function viewEmployees() {
+      const sql = `SELECT * FROM employees`;
         
-      db.query(sql, (err, rows) => {
+      db.query(sql, (err, result) => {
         if (err) {
           res.status(500).json({ error: err.message });
           return;
         }
-        res.json({
-          message: 'success',
-          data: rows,
-        });
+        console.table(result);
+        init();
       });
-    });
-
+}
 // Function call to initialize app
 init();
