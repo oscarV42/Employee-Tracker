@@ -1,7 +1,5 @@
 # Employee-Tracker
 
-Manage a company's employee database, using Node.js, Inquirer, and MySQL.
-
 ![GitHub license](https://img.shields.io/badge/license-MIT-yellow.svg)
 
 ## Description
@@ -11,6 +9,7 @@ A command-line application that allows the user to manage a company's employee d
 ## Table of Contents
 
 - [installation](#installation)
+
 - [Usage](#usage)
 
 - [License](#license)
@@ -31,11 +30,22 @@ To install necessary dependencies, run the following command:
 
 ---
 
+For further instructions on getting setup, refer to the gif below:
+
+![SetupDemo](./assets/EmpTracker.gif)
+
+As shown above, you will need to log into your own mysql account if you want to
+initialize the database and seed some initial company data. (PLEASE make sure you are in the db folder when doing this!!!!)
+
 ## Usage
 
 Use Node.js command line interface to run application
 
 Please refer to this demo gif:
+
+![Usage](./assets/EmpTrackerUsage.gif)
+
+Too hard to follow? No worries, check the link below to be directed to an mp4 file instead!
 
 ## License
 
