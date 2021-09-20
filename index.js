@@ -16,7 +16,9 @@ const db = mysql.createConnection(
   );
   
 // New department prompt
-const department = [
+const department = () => {
+
+    inquirer.prompt([
     {
         type: 'input',
         message: 'Please enter the name of the department:',
@@ -28,7 +30,10 @@ const department = [
             return 'Please enter at leat one character!';
         }
     }
-]
+    ]).then((data) => {
+        addNewDept(data.department_name);
+    })
+}
 
 // Prompts user about new role
 // Inserts that data into the database
@@ -43,8 +48,8 @@ const rolePrompt = (Departments) => {
                 return;
             }
         console.log('Successfully added role to database!')
-        });
         init();
+        });
     }
 
     inquirer.prompt([
@@ -107,8 +112,8 @@ const employeePrompt = (roles, Mngers) => {
                 return;
             }
             console.log('Empolyee added to the database!');
-        });
-        init();
+            init();
+        });    
     }
 
     inquirer.prompt([
@@ -212,8 +217,8 @@ const updateEmplyeePrompt = (roles, employees) => {
                         return;
                     }
                     console.log(`Employee ${employeeId} successfully updated!`)
+                    init();
                 })
-                init();
             })
         })
       })
@@ -228,16 +233,11 @@ function choice_handler(answer){
             break;
         case 'View all employees': viewEmployees();
             break;
-        case 'Add a department':
-            inquirer.prompt(department)
-            .then((answer) => {
-                addNewDept(answer.department_name)
-            })
+        case 'Add a department': department();
             break;
-        case 'Add a role': createNewRole();
+        case 'Add a role': getDepartmentName();
             break;
-        case 'Add an employee':
-             createNewEmployee();
+        case 'Add an employee': getRoleandName();
             break;
         case 'Update an employee role': getEmployeesAndRoles();
             break; 
@@ -291,7 +291,7 @@ function viewRoles(){
 }
 
 // Create a role
-function createNewRole() {
+function getDepartmentName() {
     var query =
       `SELECT id , department_name FROM departments`
     db.query(query, function (err, result) {
@@ -323,7 +323,7 @@ function viewEmployees() {
 
 // Getting list of employees that are possible managers and 
 // roles from the databse
-function createNewEmployee() {
+function getRoleandName() {
     const sql = "SELECT department_Id, role_title FROM roles";
     const sql2 = "SELECT id, first_name, last_name FROM employees"
 
