@@ -47,6 +47,8 @@ Please refer to this demo gif:
 
 Too hard to follow? No worries, check the link below to be directed to an mp4 file instead!
 
+https://drive.google.com/file/d/1Qn1EMOKAJhbB-XSN1_2kMqd5gMtIq4rK/view?usp=sharing
+
 ## License
 
 This project is licensed under the MIT license
