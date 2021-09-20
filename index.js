@@ -23,7 +23,7 @@ const db = mysql.createConnection(
     console.log(`Connected to the database.`)
   );
   
-
+// New department prompt
 const department = [
     {
         type: 'input',
@@ -31,6 +31,9 @@ const department = [
         name: 'department_name'  
     }
 ]
+
+// Prompts user about new role
+// Inserts that data into the database
 const rolePrompt = (Departments) => {
 
     const insertNewRole = (title, salary, id) => {
@@ -79,7 +82,24 @@ const rolePrompt = (Departments) => {
         });
     })
 }
-const employee = [
+// Create new emplyee prmopts and inserting proper data 
+// for new employee in the database
+const employeePrompt = (roles, Mngers) => {
+
+    const insertNewEmployee = (firstN, lastN, role_id, Mnger_id) => {
+        const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES
+        ("${firstN}", "${lastN}", "${role_id}", "${Mnger_id}")`
+        db.query(sql, (err, result) => {
+            if(err){
+                console.log(err);
+                return;
+            }
+            console.log('Empolyee added to the database!');
+        });
+        init();
+    }
+
+    inquirer.prompt([
     {
         type: 'input',
         message: `Enter the employee's first name:`,
@@ -91,16 +111,42 @@ const employee = [
         name: 'last_name'
     },
     {
-        type: 'input',
-        message: `Enter the employee's role id:`,
-        name: 'role_id'
+        type: 'list',
+        message: `Please select the employee's role:`,
+        name: 'role',
+        choices: roles
     },
     {
-        type: 'input',
-        message: `Enter the employee's manager id:`,
-        name: 'manager_id'
+        type: 'list',
+        message: `Please select the employee's manager:`,
+        name: 'manager_name',
+        choices: Mngers
     },
-]
+    ]).then((newEmpData) => {
+        const firstName = newEmpData.first_name;
+        const lastName = newEmpData.last_name;
+
+        db.query(`SELECT id FROM employees WHERE concat(first_name," ", last_name)
+        = ("${newEmpData.manager_name}")`, (err, result) => {
+            if(err){
+                console.log(err);
+                return;
+            }
+            const manager_id = result[0].id;
+
+            db.query(`SELECT id FROM roles WHERE role_title = ("${newEmpData.role}")`,
+            (err, result) => {
+                if (err){
+                    console.log(err);
+                    return;
+                }
+                const role_id = result[0].id
+
+                insertNewEmployee(firstName, lastName, role_id, manager_id)
+            })
+        })
+    })
+}
 
 
 function choice_handler(answer){
@@ -127,6 +173,7 @@ function choice_handler(answer){
              createNewEmployee();
             break;
         case 'Update an employee role':
+            getEmployeesAndRoles();
             break; 
             default:
                 db.end();
@@ -233,6 +280,8 @@ function viewEmployees() {
       });
 }
 
+// Getting list of employees that are possible managers and 
+// roles from the databse
 function createNewEmployee() {
     const sql = "SELECT department_Id, role_title FROM roles";
     const sql2 = "SELECT id, first_name, last_name FROM employees"
@@ -243,20 +292,40 @@ function createNewEmployee() {
             return;
         }
         const roles = [];
-        for(var i = 0; i <= result.length; i++){
+        for(var i = 0; i < result.length; i++){
             roles.push(result[i].role_title);
         }
         
-        const Mngers = [];
+        const Mngers = ['None'];
         db.query(sql2, (err, result) => {
             if(err){
                 console.log(err);
                 return;
             }
-            for(var i = 0; i <= result.length; 1++){
+            for(var i = 0; i < result.length; i++){
                 Mngers.push(`${result[i].first_name} ${result[i].last_name}`)
             }
             employeePrompt(roles, Mngers);
+        })
+    })
+}
+
+function getEmployeesAndRoles() {
+    db.query(`SELECT role_title from roles`, (err, result) => {
+        if(err){
+            console.log(err);
+            return;
+        }
+        const roles = [];
+        for(var i = 0; i < result.length; i++){
+            roles.push(result[i].role_title);
+        }
+
+        db.query(`SELECT first_name, last_name FROM employees`, (err, result) => {
+            if(err){
+                console.log(err);
+            }
+            const emplyees = [];
         })
     })
 }
