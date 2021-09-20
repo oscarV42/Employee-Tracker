@@ -20,7 +20,13 @@ const department = [
     {
         type: 'input',
         message: 'Please enter the name of the department:',
-        name: 'department_name'  
+        name: 'department_name',
+        validate: answer => {
+            if(answer !== "") {
+                return true;
+            }
+            return 'Please enter at leat one character!';
+        }
     }
 ]
 
@@ -45,12 +51,25 @@ const rolePrompt = (Departments) => {
     {
         type: 'input',
         message: 'Please enter role name:',
-        name: 'role_name'
+        name: 'role_name',
+        validate: answer => {
+            if(answer !== "") {
+                return true;
+            }
+            return 'Please enter at leat one character!';
+        }
     },
     {
         type: 'input',
         message: 'Enter salary:',
-        name: 'role_salary'
+        name: 'role_salary',
+        validate: answer => {
+            const pass = answer.match(/^[1-9]\d*$/);
+            if(pass){
+                return true;
+            }
+            return "Please enter a positive number greater than zero.";
+        }
     },
     {
         type: 'list',
@@ -74,6 +93,7 @@ const rolePrompt = (Departments) => {
         });
     })
 }
+
 // Create new emplyee prmopts and inserting proper data 
 // for new employee in the database
 const employeePrompt = (roles, Mngers) => {
@@ -95,12 +115,24 @@ const employeePrompt = (roles, Mngers) => {
     {
         type: 'input',
         message: `Enter the employee's first name:`,
-        name: 'first_name'
+        name: 'first_name',
+        validate: answer => {
+            if(answer !== "") {
+                return true;
+            }
+            return 'Please enter at leat one character!';
+        }
     },
     {
         type: 'input',
         message: `Enter the employees last name:`,
-        name: 'last_name'
+        name: 'last_name',
+        validate: answer => {
+            if(answer !== "") {
+                return true;
+            }
+            return 'Please enter at leat one character!';
+        }
     },
     {
         type: 'list',
@@ -140,6 +172,7 @@ const employeePrompt = (roles, Mngers) => {
     })
 }
 
+// function that handles updating the database with given data chosen by the user
 const updateEmplyeePrompt = (roles, employees) => {
     inquirer.prompt([
         {
@@ -186,16 +219,14 @@ const updateEmplyeePrompt = (roles, employees) => {
       })
 }
 
+// function that handles what the user wants to do after they answer the initial prompt
 function choice_handler(answer){
     switch(answer) {
-        case 'View all departments':
-            viewDepts();
+        case 'View all departments': viewDepts();
             break;
-        case 'View all roles':
-            viewRoles();
+        case 'View all roles': viewRoles();
             break;
-        case 'View all employees':
-            viewEmployees();
+        case 'View all employees': viewEmployees();
             break;
         case 'Add a department':
             inquirer.prompt(department)
@@ -203,17 +234,14 @@ function choice_handler(answer){
                 addNewDept(answer.department_name)
             })
             break;
-        case 'Add a role':
-            createNewRole();
+        case 'Add a role': createNewRole();
             break;
         case 'Add an employee':
              createNewEmployee();
             break;
-        case 'Update an employee role':
-            getEmployeesAndRoles();
+        case 'Update an employee role': getEmployeesAndRoles();
             break; 
-            default:
-                db.end();
+            default: db.end();
                 break;
     }   
 }
@@ -232,7 +260,7 @@ function choice_handler(answer){
 
 }
 
-  // Create a department
+// Create a department
 function addNewDept(newDept) {
     const sql = `INSERT INTO departments (department_name)
       VALUE (?)`;
@@ -248,7 +276,7 @@ function addNewDept(newDept) {
     });
 }
   
-    // Read all roles
+// Read all roles
 function viewRoles(){
     const sql = `SELECT * FROM roles`;
       
@@ -262,7 +290,7 @@ function viewRoles(){
     });
 }
 
-  // Create a role
+// Create a role
 function createNewRole() {
     var query =
       `SELECT id , department_name FROM departments`
@@ -279,7 +307,7 @@ function createNewRole() {
     })
 }
   
-    // Read all employees
+// Read all employees
 function viewEmployees() {
       const sql = `SELECT * FROM employees`;
         
@@ -323,6 +351,7 @@ function createNewEmployee() {
     })
 }
 
+// function to get Employees and roles from database
 function getEmployeesAndRoles() {
     db.query(`SELECT role_title from roles`, (err, result) => {
         if(err){
