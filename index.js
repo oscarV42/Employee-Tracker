@@ -325,7 +325,10 @@ function getEmployeesAndRoles() {
             if(err){
                 console.log(err);
             }
-            const emplyees = [];
+            const employees = [];
+            for(var i = 0; i < result.length; i++){
+                employees.push(result[i].first_name, " ", result[i].last_name)
+            }
         })
     })
 }
