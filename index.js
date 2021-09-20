@@ -148,6 +148,51 @@ const employeePrompt = (roles, Mngers) => {
     })
 }
 
+const updateEmplyeePrompt = (roles, employees) => {
+    inquirer.prompt([
+        {
+          type: "list",
+          name: "employeeName",
+          message: "Which employee do you want to change the role? ",
+          choices: employees,
+        },
+        {
+          type: "list",
+          name: "employeeRole",
+          message: "Please select a new role:",
+          choices: roles
+        }
+      ]).then((data) => {
+        const employeeName = data.employeeName;
+        const newRole = data.employeeRole;
+
+        db.query(`SELECT id FROM roles WHERE role_title = ("${newRole}")`, (err, result) =>{
+            if(err){
+                console.log(err);
+                return;
+            }
+            const role_id = result[0].id;
+
+            db.query(`SELECT id FROM employees WHERE concat(first_name, " ", last_name) = 
+            ("${employeeName}")`, (err, result) => {
+                if(err){
+                    console.log(err);
+                }
+                const employeeId = result[0].id;
+
+                db.query(`UPDATE employees SET role_id = ("${role_id}") WHERE id = ("${employeeId}")`,
+                (err, result) => {
+                    if(err){
+                        console.log(err);
+                        return;
+                    }
+                    console.log(`Employee ${employeeId} successfully updated!`)
+                })
+                init();
+            })
+        })
+      })
+}
 
 function choice_handler(answer){
     switch(answer) {
@@ -179,30 +224,6 @@ function choice_handler(answer){
                 db.end();
                 break;
     }   
-}
-
-// Function to initialize app
-function init() {
-    inquirer
-    .prompt([
-        {
-         type: 'list',
-         message: 'What wpuld ypu like to do?',
-         name: 'init',
-         choices: ['View all departments', 
-         'View all roles', 
-         'View all employees', 
-         'Add a department', 
-         'Add a role', 
-         'Add an employee', 
-         'Update an employee role',
-         'Quit']
-        }
-    ])
-    .then((data) => {
-        choice_handler(data.init);
-    });
-    
 }
 
   // Read all departments
@@ -327,10 +348,35 @@ function getEmployeesAndRoles() {
             }
             const employees = [];
             for(var i = 0; i < result.length; i++){
-                employees.push(result[i].first_name, " ", result[i].last_name)
+                employees.push(result[i].first_name + " " + result[i].last_name)
             }
+            updateEmplyeePrompt(roles, employees);
         })
     })
+}
+
+// Function to initialize app
+function init() {
+    inquirer
+    .prompt([
+        {
+         type: 'list',
+         message: 'What wpuld ypu like to do?',
+         name: 'init',
+         choices: ['View all departments', 
+         'View all roles', 
+         'View all employees', 
+         'Add a department', 
+         'Add a role', 
+         'Add an employee', 
+         'Update an employee role',
+         'Quit']
+        }
+    ])
+    .then((data) => {
+        choice_handler(data.init);
+    });
+    
 }
 
 // Function call to initialize app
