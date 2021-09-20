@@ -47,6 +47,8 @@ Please refer to this demo gif:
 
 Too hard to follow? No worries, check the link below to be directed to an mp4 file instead!
 
+EmpTrrackerUsage.mp4
+
 ## License
 
 This project is licensed under the MIT license
