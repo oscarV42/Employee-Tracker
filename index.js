@@ -4,16 +4,7 @@ const mysql = require('mysql2');
 require('dotenv').config();
 
 // Connect to database
-const db = mysql.createConnection(
-    {
-      host: 'localhost',
-      // MySQL username,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-    },
-    console.log(`Connected to the database.`)
-  );
+const db = require('./server/server')
   
 // New department prompt
 const department = () => {
@@ -104,16 +95,29 @@ const rolePrompt = (Departments) => {
 const employeePrompt = (roles, Mngers) => {
 
     const insertNewEmployee = (firstN, lastN, role_id, Mnger_id) => {
-        const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES
-        ("${firstN}", "${lastN}", "${role_id}", "${Mnger_id}")`
-        db.query(sql, (err, result) => {
+
+        const insert = (sql) => {
+            db.query(sql, (err, result) => {
             if(err){
                 console.log(err);
                 return;
             }
             console.log('Empolyee added to the database!');
             init();
-        });    
+            });
+        }  
+ 
+        const sql2 = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES
+        ("${firstN}", "${lastN}", "${role_id}", NULL)`
+    
+        const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES
+        ("${firstN}", "${lastN}", "${role_id}", "${Mnger_id}")`
+        
+        if(Mnger_id === ''){
+            insert(sql2)
+        }else{
+            insert(sql)  
+        }
     }
 
     inquirer.prompt([
@@ -155,13 +159,18 @@ const employeePrompt = (roles, Mngers) => {
         const firstName = newEmpData.first_name;
         const lastName = newEmpData.last_name;
 
-        db.query(`SELECT id FROM employees WHERE concat(first_name," ", last_name)
-        = ("${newEmpData.manager_name}")`, (err, result) => {
-            if(err){
-                console.log(err);
-                return;
-            }
-            const manager_id = result[0].id;
+        if(newEmpData.manager_name !== "None"){
+            db.query(`SELECT id FROM employees WHERE concat(first_name," ", last_name)
+            = ("${newEmpData.manager_name}")`, (err, result) => {
+                if(err){
+                    console.log(err);
+                    return;
+                }
+                manager_id = result[0].id;
+            })
+        }   
+
+        manager_id = '';
 
             db.query(`SELECT id FROM roles WHERE role_title = ("${newEmpData.role}")`,
             (err, result) => {
@@ -174,7 +183,6 @@ const employeePrompt = (roles, Mngers) => {
                 insertNewEmployee(firstName, lastName, role_id, manager_id)
             })
         })
-    })
 }
 
 // function that handles updating the database with given data chosen by the user
